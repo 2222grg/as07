@@ -314,7 +314,6 @@ footer .end{margin-top:8px!important}
   </div>
 </section>
 <div id="fx"><b>特效開關</b><label><input type="checkbox" data-fx="float" checked> 上下浮動</label><label><input type="checkbox" data-fx="pos" checked> 位置傾斜</label><label><input type="checkbox" data-fx="vel" checked> 速度傾斜</label></div>
-<div id="calc"></div>
 
 <div class="fixedBand"><img class="tn t" data-img="torn_top" alt=""><img class="tn b" data-img="torn_bot" alt=""><div><h3>接下來，換你動手</h3><p>三個任務，等你通關。</p></div></div>
 
@@ -471,7 +470,7 @@ footer .end{margin-top:8px!important}
     </div>
     <div class="boxes">
       <div class="box"><b>使用的 AI</b>Anthropic Claude（Sonnet 5.5），2026/11/24：資料檢索、全部文字、網頁程式碼、第 1 章原分格圖與互動邏輯。插畫另由圖像生成工具產出。</div>
-      <div class="box"><b>互動敘事技巧</b>分支劇情（依年齡與戶籍走不同路線）、選擇與後果（行囊與判讀）、手電筒探索（封面）、可操作系統（公投門檻計算機）、個人化結局（任務單）。</div>
+      <div class="box"><b>互動敘事技巧（用了課堂筆記的哪幾招）</b><u>主技巧＝捲動敘事（scrollytelling）</u>：讀者的捲動就是翻漫畫的動作。①<u>橫向吸頂＋翻牌</u>（第 3 章）：外層拉長、內層吸頂，捲軸帶著卡片橫向走，卡片走到畫面中線就翻面。②<u>浮動／位置傾斜／速度傾斜</u>：卡片上下飄、依位置歪、依捲動快慢甩動，右上角可自己開關比較。③<u>垂直吸頂場景</u>（第 7 章）：畫面釘住，捲動變成時間，天色由白晝走到入夜、英雄走到投票所。④<u>固定背景帶</u>：背景不動、內容上滑。另外搭配分支劇情、選擇與後果（行囊、判讀）、手電筒探索與個人化結局（任務單）。</div>
       <div class="box"><b>AI 的底線</b>適合 AI：整理資料、起草、寫程式、重複量大的工作。不交給 AI：替你決定投誰、評比候選人、生成真人臉孔與聲音、最終事實判斷。</div>
       <div class="box"><b>未使用 AI 的內容</b>沒有 AI 生成的真人照片、聲音或影片；沒有模仿任何真實候選人；「假訊息」皆為標註「虛構」的教學情境。</div>
       <div class="box"><b>資料來源與限制</b>中選會公告（中央社）、《數位時代》、《天下》、TVBS、《台北時報》、TEDS、臺大與政大論文。部分為媒體整理；公投計算機為示意概算。</div>
@@ -596,7 +595,7 @@ const deck=[
  ['05 · 查證','先停三秒','看有沒有主流媒體或官方帳號同步發布。'],
  ['06 · 門檻','同意票過四分之一','公投不只要贏，還要夠多人出門。'],
  ['07 · 結尾','出門就是英雄','12/4 公告當選，之後換你監督。']];
-const track=$('#track'),gal=$('#gal'),fxp=$('#fx'),calcP=$('#calc');
+const track=$('#track'),gal=$('#gal'),fxp=$('#fx');
 track.innerHTML=deck.map((c,i)=>`<div class="card" data-i="${i}"><div class="float" style="animation-duration:${3.2+(i%3)*.45}s;animation-delay:${-i*.55}s"><div class="tilt"><div class="inner"><div class="back"></div><div class="face${c[3]?' joker':''}"><div class="fs">${c[0]}</div><div class="fi"><img src="${ART[i]}" alt=""></div><div class="fb">${c[1]}</div><div class="fd">${c[2]}</div></div></div></div></div></div>`).join('');
 const cardEls=$$('.card'),tiltEls=$$('.tilt'),fx={float:true,pos:true,vel:true};
 $$('#fx input').forEach(i=>i.onchange=()=>{fx[i.dataset.fx]=i.checked;if(i.dataset.fx==='float')document.body.classList.toggle('nofloat',!i.checked)});
@@ -623,15 +622,12 @@ function frame(){
   const gr=gal.getBoundingClientRect(),gp=clamp(-gr.top/Math.max(1,gal.offsetHeight-vh),0,1);
   const tx=-gp*D;track.style.transform=`translate3d(${tx}px,0,0)`;
   vel=vel*.86+(tx-prevTx)*.14;prevTx=tx;
-  const inG=gr.top<=vh*.5&&gr.bottom>=vh*.5;fxp.classList.toggle('on',inG);calcP.classList.toggle('on',inG);
+  const inG=gr.top<=vh*.5&&gr.bottom>=vh*.5;fxp.classList.toggle('on',inG);
   const vt=fx.vel?clamp(-vel*.45,-14,14):0;
   cardEls.forEach((c,i)=>{const r=c.getBoundingClientRect(),cx=r.left+r.width/2;
     c.classList.toggle('up',cx<=vw*.5+2);
     const pt=fx.pos?clamp((cx-vw/2)/vw,-1,1)*10:0;
     tiltEls[i].style.setProperty('--rot',(pt+vt).toFixed(2)+'deg')});
-  if(inG){const sy=Math.round(scrollY),topY=Math.round(scrollY+gr.top),oh=Math.round(gal.offsetHeight);
-    const t=`<b>① Y 軸</b>：比例 =（捲動量 − 外層起點）÷（外層高度 − 視窗高度）= (${sy} − ${topY}) ÷ (${oh} − ${Math.round(vh)}) = <b>${(gp*100).toFixed(1)}%</b><br><b>② X 軸</b>：可移距離 = 長內容寬 − 視窗寬 = ${Math.round(W)} − ${Math.round(vw)} = <b>${Math.round(D)}px</b>；translateX = −比例 × 可移距離 = −${gp.toFixed(3)} × ${Math.round(D)} = <b>${Math.round(tx)}px</b>`;
-    if(t!==lastTxt){calcP.innerHTML=t;lastTxt=t}}
   /* day scene */
   const dr=day.getBoundingClientRect();
   if(dr.bottom>-50&&dr.top<vh+50){
